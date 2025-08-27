@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Message System</title>
+    <script src="https://unpkg.com/@solana/web3.js@1.95.2/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@coral-xyz/anchor@0.31.0/dist/browser.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { background: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .message { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>🌟 Solana Message System</h1>
+    <p><strong>Program ID:</strong> 6B8ebKA127zHwfjk8BEv1UT6KUeri6vBtAf46uNzBN5H</p>
+    <p><strong>Network:</strong> Devnet</p>
+
+    <div class="container">
+        <h2>Wallet Connection</h2>
+        <button id="connectWallet">Connect Phantom Wallet</button>
+        <div id="walletStatus" class="status info" style="display:none;"></div>
+    </div>
+
+    <div id="systemContainer" class="container" style="display:none;">
+        <h2>System Status</h2>
+        <div id="systemStatus" class="status info">Checking system status...</div>
+        <button id="initializeBtn" style="display:none;">Initialize System</button>
+    </div>
+
+    <div id="messageContainer" class="container" style="display:none;">
+        <h2>Post New Message</h2>
+        <textarea id="messageInput" rows="3" placeholder="What's on your mind? (Max 280 characters)" maxlength="280"></textarea>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <span id="charCount">0/280 characters</span>
+            <button id="postBtn">Post Message</button>
+        </div>
+    </div>
+
+    <div id="messagesContainer" class="container" style="display:none;">
+        <h2>Messages</h2>
+        <div id="messagesList"></div>
+        <button id="refreshBtn">Refresh Messages</button>
+    </div>
+
+    <script>
+        const PROGRAM_ID = new solanaWeb3.PublicKey('6B8ebKA127zHwfjk8BEv1UT6KUeri6vBtAf46uNzBN5H');
+        const connection = new solanaWeb3.Connection('https://api.devnet.solana.com', 'confirmed');
+        
+        let wallet = null;
+        let globalStatePda = null;
+        let isInitialized = false;
+        let messageCount = 0;
+
+        // Initialize PDAs
+        const [globalStatePdaAddr] = solanaWeb3.PublicKey.findProgramAddressSync(
+            [Buffer.from('global')],
+            PROGRAM_ID
+        );
+        globalStatePda = globalStatePdaAddr;
+
+        // Wallet connection
+        document.getElementById('connectWallet').addEventListener('click', async () => {
+            try {
+                if (window.solana) {
+                    const response = await window.solana.connect();
+                    wallet = response.publicKey;
+                    document.getElementById('walletStatus').innerHTML = `Connected: ${wallet.toString().slice(0,8)}...`;
+                    document.getElementById('walletStatus').className = 'status success';
+                    document.getElementById('walletStatus').style.display = 'block';
+                    document.getElementById('connectWallet').textContent = 'Wallet Connected ✅';
+                    document.getElementById('connectWallet').disabled = true;
+                    
+                    showSystemStatus();
+                    await checkSystemStatus();
+                } else {
+                    alert('Phantom wallet not found! Please install Phantom wallet extension.');
+                }
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                document.getElementById('walletStatus').innerHTML = `Error: ${error.message}`;
+                document.getElementById('walletStatus').className = 'status error';
+                document.getElementById('walletStatus').style.display = 'block';
+            }
+        });
+
+        function showSystemStatus() {
+            document.getElementById('systemContainer').style.display = 'block';
+            document.getElementById('messageContainer').style.display = 'block';
+            document.getElementById('messagesContainer').style.display = 'block';
+        }
+
+        async function checkSystemStatus() {
+            try {
+                const accountInfo = await connection.getAccountInfo(globalStatePda);
+                if (accountInfo) {
+                    isInitialized = true;
+                    // Simple parsing of account data
+                    const data = accountInfo.data;
+                    // Skip discriminator (8 bytes) and read u64 message count
+                    const messageCountBuffer = data.slice(8, 16);
+                    messageCount = new DataView(messageCountBuffer.buffer).getBigUint64(0, true);
+                    
+                    document.getElementById('systemStatus').innerHTML = `✅ System initialized! Messages: ${messageCount}`;
+                    document.getElementById('systemStatus').className = 'status success';
+                    document.getElementById('initializeBtn').style.display = 'none';
+                    
+                    await loadMessages();
+                } else {
+                    isInitialized = false;
+                    document.getElementById('systemStatus').innerHTML = '⚠️ System not initialized. Click to initialize:';
+                    document.getElementById('systemStatus').className = 'status error';
+                    document.getElementById('initializeBtn').style.display = 'inline-block';
+                }
+            } catch (error) {
+                console.error('Error checking system status:', error);
+                document.getElementById('systemStatus').innerHTML = `Error: ${error.message}`;
+                document.getElementById('systemStatus').className = 'status error';
+            }
+        }
+
+        // Character counter
+        document.getElementById('messageInput').addEventListener('input', (e) => {
+            const count = e.target.value.length;
+            document.getElementById('charCount').textContent = `${count}/280 characters`;
+            document.getElementById('postBtn').disabled = count === 0 || count > 280;
+        });
+
+        // Initialize system
+        document.getElementById('initializeBtn').addEventListener('click', async () => {
+            if (!wallet) return;
+            
+            try {
+                document.getElementById('initializeBtn').textContent = 'Initializing...';
+                document.getElementById('initializeBtn').disabled = true;
+                
+                const transaction = new solanaWeb3.Transaction().add(
+                    new solanaWeb3.TransactionInstruction({
+                        keys: [
+                            { pubkey: globalStatePda, isSigner: false, isWritable: true },
+                            { pubkey: wallet, isSigner: true, isWritable: true },
+                            { pubkey: solanaWeb3.SystemProgram.programId, isSigner: false, isWritable: false }
+                        ],
+                        programId: PROGRAM_ID,
+                        data: Buffer.from([175, 175, 109, 31, 13, 152, 155, 237]) // initialize instruction discriminator
+                    })
+                );
+                
+                const signature = await window.solana.signAndSendTransaction(transaction);
+                console.log('Initialize transaction:', signature);
+                
+                await connection.confirmTransaction(signature.signature);
+                await checkSystemStatus();
+                
+            } catch (error) {
+                console.error('Error initializing:', error);
+                alert('Error initializing system: ' + error.message);
+            } finally {
+                document.getElementById('initializeBtn').textContent = 'Initialize System';
+                document.getElementById('initializeBtn').disabled = false;
+            }
+        });
+
+        // Post message
+        document.getElementById('postBtn').addEventListener('click', async () => {
+            if (!wallet || !isInitialized) return;
+            
+            const content = document.getElementById('messageInput').value.trim();
+            if (!content || content.length > 280) return;
+            
+            try {
+                document.getElementById('postBtn').textContent = 'Posting...';
+                document.getElementById('postBtn').disabled = true;
+                
+                // Create message PDA
+                const messageIdBuffer = Buffer.alloc(8);
+                messageIdBuffer.writeBigUint64LE(BigInt(messageCount), 0);
+                
+                const [messagePda] = solanaWeb3.PublicKey.findProgramAddressSync(
+                    [Buffer.from('message'), wallet.toBuffer(), messageIdBuffer],
+                    PROGRAM_ID
+                );
+                
+                // Create post message instruction data
+                const contentBytes = Buffer.from(content, 'utf8');
+                const contentLength = Buffer.alloc(4);
+                contentLength.writeUInt32LE(contentBytes.length, 0);
+                const instructionData = Buffer.concat([
+                    Buffer.from([149, 81, 140, 45, 80, 54, 58, 106]), // post_message discriminator
+                    contentLength,
+                    contentBytes
+                ]);
+                
+                const transaction = new solanaWeb3.Transaction().add(
+                    new solanaWeb3.TransactionInstruction({
+                        keys: [
+                            { pubkey: globalStatePda, isSigner: false, isWritable: true },
+                            { pubkey: messagePda, isSigner: false, isWritable: true },
+                            { pubkey: wallet, isSigner: true, isWritable: true },
+                            { pubkey: solanaWeb3.SystemProgram.programId, isSigner: false, isWritable: false }
+                        ],
+                        programId: PROGRAM_ID,
+                        data: instructionData
+                    })
+                );
+                
+                const signature = await window.solana.signAndSendTransaction(transaction);
+                console.log('Post message transaction:', signature);
+                
+                await connection.confirmTransaction(signature.signature);
+                
+                document.getElementById('messageInput').value = '';
+                document.getElementById('charCount').textContent = '0/280 characters';
+                
+                await checkSystemStatus();
+                
+            } catch (error) {
+                console.error('Error posting message:', error);
+                alert('Error posting message: ' + error.message);
+            } finally {
+                document.getElementById('postBtn').textContent = 'Post Message';
+                document.getElementById('postBtn').disabled = false;
+            }
+        });
+
+        async function loadMessages() {
+            try {
+                // Get all program accounts (simplified approach)
+                const accounts = await connection.getProgramAccounts(PROGRAM_ID);
+                const messageAccounts = accounts.filter(account => 
+                    account.account.data.length > 100 // Messages are longer than global state
+                );
+                
+                const messagesList = document.getElementById('messagesList');
+                messagesList.innerHTML = '';
+                
+                if (messageAccounts.length === 0) {
+                    messagesList.innerHTML = '<p>No messages yet. Be the first to post!</p>';
+                    return;
+                }
+                
+                messageAccounts.forEach((account, index) => {
+                    const data = account.account.data;
+                    
+                    // Simple parsing (this is basic - would need proper deserialization in production)
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message';
+                    messageDiv.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <small style="color: #666;">Message #${index}</small>
+                            <small style="color: #999;">Account: ${account.pubkey.toString().slice(0,8)}...</small>
+                        </div>
+                        <div style="font-style: italic; color: #555;">
+                            [Message content - view in browser console for details]
+                        </div>
+                    `;
+                    messagesList.appendChild(messageDiv);
+                    
+                    console.log(`Message ${index}:`, {
+                        account: account.pubkey.toString(),
+                        data: Array.from(data)
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Error loading messages:', error);
+                document.getElementById('messagesList').innerHTML = '<p>Error loading messages. Check console for details.</p>';
+            }
+        }
+
+        // Refresh messages
+        document.getElementById('refreshBtn').addEventListener('click', async () => {
+            document.getElementById('refreshBtn').textContent = 'Refreshing...';
+            document.getElementById('refreshBtn').disabled = true;
+            
+            await checkSystemStatus();
+            
+            document.getElementById('refreshBtn').textContent = 'Refresh Messages';
+            document.getElementById('refreshBtn').disabled = false;
+        });
+
+        // Check if Phantom is installed on page load
+        window.addEventListener('load', () => {
+            if (!window.solana) {
+                document.getElementById('walletStatus').innerHTML = 'Please install <a href="https://phantom.app/" target="_blank">Phantom Wallet</a> to use this dApp.';
+                document.getElementById('walletStatus').className = 'status error';
+                document.getElementById('walletStatus').style.display = 'block';
+                document.getElementById('connectWallet').disabled = true;
+            }
+        });
+    </script>
+
+    <footer style="margin-top: 40px; padding: 20px; border-top: 1px solid #ddd; text-align: center; color: #666;">
+        <p>
+            <strong>Solana Message System</strong><br>
+            A simple decentralized message posting dApp built on Solana blockchain.<br>
+            <small>Program ID: 6B8ebKA127zHwfjk8BEv1UT6KUeri6vBtAf46uNzBN5H | Network: Devnet</small>
+        </p>
+    </footer>
+</body>
+</html>

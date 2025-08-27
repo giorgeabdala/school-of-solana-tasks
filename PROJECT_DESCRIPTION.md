@@ -1,6 +1,6 @@
 # Project Description
 
-**Deployed Frontend URL:** [Frontend will be deployed soon - build in progress]
+**Deployed Frontend URL:** https://solana-message-system-3mk9vuoip-giorgeabdalas-projects.vercel.app
 
 **Solana Program ID:** `6B8ebKA127zHwfjk8BEv1UT6KUeri6vBtAf46uNzBN5H`
 
