@@ -1,54 +1,54 @@
 # School of Solana - Season 7 📚
 
-Este repositório contém todas as tasks e o projeto final da **School of Solana Season 7**.
+This repository contains all tasks and the final project from **School of Solana Season 7**.
 
 ![School of Solana](https://github.com/Ackee-Blockchain/school-of-solana/blob/master/.banner/banner.png?raw=true)
 
-## 📁 Estrutura do Repositório
+## 📁 Repository Structure
 
 ### 🎯 Tasks (1-4)
-Exercícios e tarefas individuais para aprendizado:
+Individual exercises and learning tasks:
 
-- **[Task 1](./tasks/task1/)** - Fundamentos de Rust
-- **[Task 2](./tasks/task2/)** - Calculator & Shapes em Rust  
+- **[Task 1](./tasks/task1/)** - Rust Fundamentals
+- **[Task 2](./tasks/task2/)** - Calculator & Shapes in Rust  
 - **[Task 3](./tasks/task3/)** - On-chain Vault (Anchor Framework)
 - **[Task 4](./tasks/task4/)** - Twitter dApp (Anchor Framework)
 
-### 🚀 Projeto Final
-**[Final Project](./final-project/)** - Sistema completo de mensagens na Solana
+### 🚀 Final Project
+**[Final Project](./final-project/)** - Complete Solana message system
 
-O projeto final é um dApp completo que inclui:
-- **Anchor Program**: Sistema de mensagens on-chain
-- **Frontend**: Interface web para interação
-- **Deploy**: Implementado na Devnet/Mainnet
+The final project is a complete dApp that includes:
+- **Anchor Program**: On-chain message system
+- **Frontend**: Web interface for interaction
+- **Deploy**: Deployed on Devnet/Mainnet
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Technologies Used
 
-- **Rust** - Linguagem principal para Solana
-- **Anchor Framework** - Framework para desenvolvimento Solana
-- **TypeScript** - Testes e frontend
-- **Next.js** - Framework React para frontend
-- **Solana Web3.js** - Interação com blockchain
+- **Rust** - Main language for Solana development
+- **Anchor Framework** - Framework for Solana development
+- **TypeScript** - Testing and frontend
+- **Next.js** - React framework for frontend
+- **Solana Web3.js** - Blockchain interaction
 
-## 📋 Requisitos Cumpridos
+## 📋 Requirements Met
 
-✅ Programa Anchor deployado na **Devnet/Mainnet**  
-✅ Uso de **PDA (Program Derived Address)**  
-✅ Testes TypeScript para **happy** e **unhappy paths**  
-✅ **Frontend** deployado e funcional  
-✅ Documentação completa no **PROJECT_DESCRIPTION.md**  
+✅ Anchor program deployed on **Devnet/Mainnet**  
+✅ Use of **PDA (Program Derived Address)**  
+✅ TypeScript tests for **happy** and **unhappy paths**  
+✅ **Frontend** deployed and functional  
+✅ Complete documentation in **PROJECT_DESCRIPTION.md**  
 
-## 🌐 Links Úteis
+## 🌐 Useful Links
 
 - [School of Solana](https://github.com/Ackee-Blockchain/school-of-solana)
 - [Solana Documentation](https://docs.solana.com/)
 - [Anchor Framework](https://www.anchor-lang.com/)
 - [Discord Support](https://discord.gg/z3JVuZyFnp)
 
-## 👨‍💻 Autor
+## 👨‍💻 Author
 
 **George Abdala** - [GitHub Profile](https://github.com/giorgeabdala)
 
 ---
 
-*Este repositório documenta minha jornada completa através da School of Solana Season 7, desde os fundamentos até o desenvolvimento de dApps complexos.*
+*This repository documents my complete journey through School of Solana Season 7, from fundamentals to developing complex dApps.*
