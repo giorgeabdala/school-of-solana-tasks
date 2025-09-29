@@ -4,9 +4,9 @@ This repository contains all tasks and the final project from **School of Solana
 
 ![School of Solana](https://github.com/Ackee-Blockchain/school-of-solana/blob/master/.banner/banner.png?raw=true)
 
-## 📁 Repository Structure
+##  Repository Structure
 
-### 🎯 Tasks (1-4)
+###  Tasks (1-4)
 Individual exercises and learning tasks:
 
 - **[Task 1](./tasks/task1/)** - Rust Fundamentals
@@ -14,7 +14,7 @@ Individual exercises and learning tasks:
 - **[Task 3](./tasks/task3/)** - On-chain Vault (Anchor Framework)
 - **[Task 4](./tasks/task4/)** - Twitter dApp (Anchor Framework)
 
-### 🚀 Final Project
+###  Final Project
 **[Final Project](./final-project/)** - Complete Solana message system
 
 The final project is a complete dApp that includes:
@@ -22,7 +22,7 @@ The final project is a complete dApp that includes:
 - **Frontend**: Web interface for interaction
 - **Deploy**: Deployed on Devnet/Mainnet
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 - **Rust** - Main language for Solana development
 - **Anchor Framework** - Framework for Solana development
@@ -30,7 +30,7 @@ The final project is a complete dApp that includes:
 - **Next.js** - React framework for frontend
 - **Solana Web3.js** - Blockchain interaction
 
-## 📋 Requirements Met
+##  Requirements Met
 
 ✅ Anchor program deployed on **Devnet/Mainnet**  
 ✅ Use of **PDA (Program Derived Address)**  
@@ -38,16 +38,16 @@ The final project is a complete dApp that includes:
 ✅ **Frontend** deployed and functional  
 ✅ Complete documentation in **PROJECT_DESCRIPTION.md**  
 
-## 🌐 Useful Links
+##  Useful Links
 
 - [School of Solana](https://github.com/Ackee-Blockchain/school-of-solana)
 - [Solana Documentation](https://docs.solana.com/)
 - [Anchor Framework](https://www.anchor-lang.com/)
 - [Discord Support](https://discord.gg/z3JVuZyFnp)
 
-## 👨‍💻 Author
+##  Author
 
-**George Abdala** - [GitHub Profile](https://github.com/giorgeabdala)
+**Giorge Abdala** - [GitHub Profile](https://github.com/giorgeabdala)
 
 ---
 
